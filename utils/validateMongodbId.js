@@ -1,13 +1,9 @@
-const mongoose = require('mongoose');
-const { error } = require('../utils/responseWrapper');
+const User = require('../models/UserModel');
 
-const validateMongodbId = (id) => {
-    const isValid = mongoose.Types.ObjectId.isValid(id);
-    if(!isValid){
-        return res.send(error(409, 'Invalid id'));
-    }else{
-        return true;
-    }
+const validateMongodbId = async (id) => {
+    const user = await User.findById(id);
+
+    return !!user;
 }
 
 module.exports = validateMongodbId;

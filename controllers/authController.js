@@ -40,7 +40,7 @@ const loginController = async (req, res) => {
             return res.send(error(400, 'All fields are required'));
         }
     
-        const user = await User.findOne({email});
+        const user = await User.findOne({email}).select('+password');
         if(!user){
             return res.send(error(404, 'User not found'));
         }
@@ -58,7 +58,7 @@ const loginController = async (req, res) => {
             secure: true
         })
 
-        return res.send(success(200, {accessToken,refreshToken}));
+        return res.send(success(200, {accessToken}));
     }catch(e){
         return res.send(error(500,e.message));
     }

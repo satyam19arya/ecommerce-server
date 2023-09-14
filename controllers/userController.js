@@ -18,7 +18,12 @@ const getAllUsers = async (req, res) => {
 const getaUsers = async (req, res) => {
     try{
         const {id} = req.params;
-        validateMongoDbId(id);
+        
+        const userExists = await validateMongoDbId(id);
+        if(!userExists){
+            return res.send(error(409, 'User not found'));
+        }
+        
         const getaUsers = await User.findById(id);
         if(!getaUsers){
             return res.send(error(409, 'User not found'));
@@ -33,9 +38,14 @@ const getaUsers = async (req, res) => {
 const deleteUser = async (req, res) => {
     try{
         const {id} = req.params;
-        validateMongoDbId(id);
+        
+        const userExists = await validateMongoDbId(id);
+        if(!userExists){
+            return res.send(error(409, 'User not found'));
+        }
+
         const deleteUser = await User.findByIdAndDelete(id);
-        return res.send(success(201, {deleteUser}));
+        return res.send(success(201, "User deleted"));
 
     }catch(e){
         return res.send(error(500,e.message));
@@ -45,7 +55,12 @@ const deleteUser = async (req, res) => {
 const updateUser = async (req, res) => {
     try{
         const id = req._id;
-        validateMongoDbId(id);
+        
+        const userExists = await validateMongoDbId(id);
+        if(!userExists){
+            return res.send(error(409, 'User not found'));
+        }
+
         const updateUser = await User.findByIdAndUpdate(id, {
             firstname: req?.body?.firstname,
             lastname: req?.body?.lastname,
@@ -65,7 +80,14 @@ const updateUser = async (req, res) => {
 const blockUser = async (req, res) => {
     try{
         const {id} = req.params;
-        validateMongoDbId(id);
+        if(id === req._id){
+            return res.send(error(409, 'You cannot block yourself'));
+        }            
+        const userExists = await validateMongoDbId(id);
+        if(!userExists){
+            return res.send(error(409, 'User not found'));
+        }
+
         const blockUser = await User.findByIdAndUpdate(id, {
             isBlocked: true,
         },{
@@ -82,7 +104,14 @@ const blockUser = async (req, res) => {
 const unblockUser = async (req, res) => {
     try{
         const {id} = req.params;
-        validateMongoDbId(id);
+        if(id === req._id){
+            return res.send(error(409, 'You cannot unblock yourself'));
+        }
+        const userExists = await validateMongoDbId(id);
+        if(!userExists){
+            return res.send(error(409, 'User not found'));
+        }
+
         const unblockUser = await User.findByIdAndUpdate(id, {
             isBlocked: false,
         },{
