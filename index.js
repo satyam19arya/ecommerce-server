@@ -17,10 +17,6 @@ app.use(cookieParser());
 const PORT = process.env.PORT;
 dbConnect();
 
-// app.use("/", (req, res) => {
-//     res.send("Hello World");
-// });
-
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/product', productRouter);
