@@ -1,6 +1,5 @@
 const Product = require('../models/ProductModel');
 const { error, success } = require('../utils/responseWrapper');
-const validateMongoDbId = require('../utils/validateMongodbId');
 const slugify = require('slugify');
 
 const createProduct = async (req, res) => {
@@ -19,10 +18,15 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
     try{
         const {id} = req.params;
-        validateMongoDbId(id);
+        const product = await Product.findById(id);
+        if(!product){
+            return res.send(error(409, 'No product found'));
+        }
+
         if(req.body.title){
             req.body.slug = slugify(req.body.title);
         }
+
         const updateProduct = await Product.findByIdAndUpdate(id, 
             req.body
         ,{
@@ -39,8 +43,10 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
     try{
         const {id} = req.params;
-        validateMongoDbId(id);
         const deleteProduct = await Product.findByIdAndDelete(id);
+        if(!deleteProduct){
+            return res.send(error(409, 'No product found'));
+        }
         res.send(success(201, "Product deleted successfully"));
     }catch(e){
         res.send(error(500,e.message));
@@ -50,7 +56,6 @@ const deleteProduct = async (req, res) => {
 const getProduct = async (req, res) => {
     try{
         const {id} = req.params;
-        validateMongoDbId(id);
         const findProduct = await Product.findById(id);
         if(!findProduct){
             return res.send(error(409, 'No product found'));
@@ -65,12 +70,13 @@ const getProduct = async (req, res) => {
 
 const getAllProduct = async (req, res) => {
     try{
-        const getallProduct = await Product.find();
-        if(!getallProduct){
-            return res.send(error(409, 'No product found'));
+        const allProducts = await Product.find();
+
+        if (!allProducts || allProducts.length === 0) {
+            return res.send(error(409, 'No products found'));
         }
 
-        return res.send(success(201, getallProduct));
+        return res.send(success(200, {allProducts}));
 
     }catch(e){
         return res.send(error(500,e.message));
